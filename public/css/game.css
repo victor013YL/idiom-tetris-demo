@@ -387,7 +387,7 @@ body.vpad-on .vpad { display: grid; }
   }
   .mobile-bar #hold-canvas-mobile { width: 68px; height: 44px; }
   .mobile-bar #next-canvas-mobile { width: 30px; height: 36px; }
-  /* Single horizontal row of stats: label val · label val · label val · label val.
+  /* Single horizontal row of stats: label val · label val · label val · label val.
    * Using inline-flex via grid auto-flow column keeps the chip compact at
    * 390 px and the values stay right of their labels. */
   .mobile-bar .mb-stats {
