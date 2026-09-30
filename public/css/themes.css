@@ -1,0 +1,182 @@
+/* tetris — themes.css
+ * 3 themes × 2 modes (dark/light). Theme is set on <html data-theme=…> data-mode=…
+ *
+ * Tokens:
+ *   --color-bg              page background
+ *   --color-surface         panels
+ *   --color-surface-strong  dialog
+ *   --color-surface-hover   hover
+ *   --color-border          hairlines
+ *   --color-text            primary text
+ *   --color-text-muted      secondary text
+ *   --color-accent          primary CTA
+ *   --color-on-accent       text on accent
+ *   --color-grid            playfield gridline
+ *   --color-board-bg        inside the board
+ *   --font-game             font used for HUD numbers
+ *   --piece-*               tetromino fills
+ *   --board-style           'flat' | 'glass' | 'pixel'
+ *   --bg-opacity            background canvas opacity
+ *   --modern-glow           how much modern theme glows (0..1)
+ */
+
+/* =====================================================================
+ * MODERN — glass blocks, neon, animated. Lots of motion and effects.
+ * ===================================================================== */
+html[data-theme="modern"][data-mode="dark"] {
+  --color-bg: #07070d;
+  --color-surface: rgba(255, 255, 255, .04);
+  --color-surface-strong: #0e0e18;
+  --color-surface-hover: rgba(255, 255, 255, .08);
+  --color-border: rgba(255, 255, 255, .10);
+  --color-text: #f0f0f5;
+  --color-text-muted: #8a8aa6;
+  --color-accent: #5cffd8;
+  --color-on-accent: #04201a;
+  --color-grid: rgba(255, 255, 255, .045);
+  --color-board-bg: rgba(8, 8, 18, .55);
+  --font-game: 'Space Grotesk', sans-serif;
+  --board-style: glass;
+  --bg-opacity: .45;
+  --modern-glow: 1;
+  --piece-I: #5cffd8;
+  --piece-O: #ffd166;
+  --piece-T: #c084fc;
+  --piece-S: #34d399;
+  --piece-Z: #ff6b9d;
+  --piece-J: #60a5fa;
+  --piece-L: #fb923c;
+}
+html[data-theme="modern"][data-mode="light"] {
+  --color-bg: #f3f4f8;
+  --color-surface: rgba(255, 255, 255, .65);
+  --color-surface-strong: #ffffff;
+  --color-surface-hover: rgba(0, 0, 0, .04);
+  --color-border: rgba(15, 15, 30, .12);
+  --color-text: #0e0e18;
+  --color-text-muted: #58586c;
+  --color-accent: #0ea5e9;
+  --color-on-accent: #ffffff;
+  --color-grid: rgba(0, 0, 0, .05);
+  --color-board-bg: rgba(255, 255, 255, .72);
+  --font-game: 'Space Grotesk', sans-serif;
+  --board-style: glass;
+  --bg-opacity: .25;
+  --modern-glow: .6;
+  --piece-I: #06b6d4;
+  --piece-O: #f59e0b;
+  --piece-T: #a855f7;
+  --piece-S: #10b981;
+  --piece-Z: #ef4444;
+  --piece-J: #2563eb;
+  --piece-L: #ea580c;
+}
+
+/* =====================================================================
+ * COLOR — vibrant GBC pixel art. Strong, saturated, big chunky pixels.
+ * ===================================================================== */
+html[data-theme="color"][data-mode="dark"] {
+  --color-bg: #1a1c2c;
+  --color-surface: #2c2e44;
+  --color-surface-strong: #20223a;
+  --color-surface-hover: #383a55;
+  --color-border: #585b7a;
+  --color-text: #ffffff;
+  --color-text-muted: #b0b3d0;
+  --color-accent: #ffcd75;
+  --color-on-accent: #1a1c2c;
+  --color-grid: #2c2e44;
+  --color-board-bg: #0e0f1a;
+  --font-game: 'Press Start 2P', 'JetBrains Mono', monospace;
+  --board-style: pixel;
+  --bg-opacity: .35;
+  --modern-glow: 0;
+  --piece-I: #41a6f6;
+  --piece-O: #ffcd75;
+  --piece-T: #b25dff;
+  --piece-S: #59c135;
+  --piece-Z: #ef4f88;
+  --piece-J: #29adff;
+  --piece-L: #ef7d57;
+}
+html[data-theme="color"][data-mode="light"] {
+  /* Bright candy palette — like a sun-bleached arcade cabinet */
+  --color-bg: #ffe8a3;
+  --color-surface: #ffffff;
+  --color-surface-strong: #fff7e0;
+  --color-surface-hover: #fff0c0;
+  --color-border: #4a3a1a;
+  --color-text: #1a1c2c;
+  --color-text-muted: #5a4a30;
+  --color-accent: #e53170;
+  --color-on-accent: #ffffff;
+  --color-grid: #fff0c0;
+  --color-board-bg: #fff7e0;
+  --font-game: 'Press Start 2P', 'JetBrains Mono', monospace;
+  --board-style: pixel;
+  --bg-opacity: .55;
+  --modern-glow: 0;
+  --piece-I: #15a3d8;
+  --piece-O: #ff9f1c;
+  --piece-T: #b14aff;
+  --piece-S: #34a800;
+  --piece-Z: #e53170;
+  --piece-J: #2255cc;
+  --piece-L: #ff6b35;
+}
+
+/* =====================================================================
+ * CLASSIC — STRICTLY black & white. No tints, no colors. Game Boy DMG.
+ * ===================================================================== */
+html[data-theme="classic"][data-mode="dark"] {
+  /* Terminal: pure black + monochrome whites */
+  --color-bg: #000000;
+  --color-surface: #0a0a0a;
+  --color-surface-strong: #0f0f0f;
+  --color-surface-hover: #1a1a1a;
+  --color-border: #2a2a2a;
+  --color-text: #ffffff;
+  --color-text-muted: #888888;
+  --color-accent: #ffffff;
+  --color-on-accent: #000000;
+  --color-grid: #1a1a1a;
+  --color-board-bg: #050505;
+  --font-game: 'JetBrains Mono', monospace;
+  --board-style: flat;
+  --bg-opacity: .12;
+  --modern-glow: 0;
+  /* All pieces use white/grey shades — STRICTLY monochrome */
+  --piece-I: #ffffff;
+  --piece-O: #e0e0e0;
+  --piece-T: #c8c8c8;
+  --piece-S: #b0b0b0;
+  --piece-Z: #989898;
+  --piece-J: #808080;
+  --piece-L: #686868;
+}
+html[data-theme="classic"][data-mode="light"] {
+  /* Paper/printer style — strict black ink on warm white */
+  --color-bg: #f4f1ea;
+  --color-surface: #ffffff;
+  --color-surface-strong: #ffffff;
+  --color-surface-hover: #ece8df;
+  --color-border: #1a1a1a;
+  --color-text: #000000;
+  --color-text-muted: #555555;
+  --color-accent: #000000;
+  --color-on-accent: #ffffff;
+  --color-grid: #d8d4cb;
+  --color-board-bg: #ffffff;
+  --font-game: 'JetBrains Mono', monospace;
+  --board-style: flat;
+  --bg-opacity: .10;
+  --modern-glow: 0;
+  /* All pieces use black/grey shades */
+  --piece-I: #000000;
+  --piece-O: #1a1a1a;
+  --piece-T: #333333;
+  --piece-S: #4d4d4d;
+  --piece-Z: #666666;
+  --piece-J: #808080;
+  --piece-L: #999999;
+}

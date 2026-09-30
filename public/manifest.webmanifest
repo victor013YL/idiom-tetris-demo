@@ -1,0 +1,14 @@
+{
+  "name": "俄罗斯成语方块儿",
+  "short_name": "成语方块",
+  "description": "可离线单机运行的俄罗斯成语方块儿。",
+  "lang": "zh-CN",
+  "start_url": ".",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#0a0a0f",
+  "theme_color": "#0a0a0f",
+  "icons": [
+    { "src": "assets/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}

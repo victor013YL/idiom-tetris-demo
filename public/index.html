@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="modern" data-mode="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+  <meta name="theme-color" content="#0a0a0f" />
+  <title>俄罗斯成语方块儿</title>
+  <meta name="description" content="支持离线单机运行的俄罗斯成语方块儿，可使用键盘、触摸和虚拟按键操作。" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="manifest" href="manifest.webmanifest" />
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/themes.css" />
+  <link rel="stylesheet" href="css/game.css" />
+</head>
+<body>
+  <!-- Animated tetromino background -->
+  <canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <div class="brand-group">
+      <a class="brand" href="/" aria-label="俄罗斯成语方块儿，重新载入" title="重新载入">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+          <rect x="2" y="2" width="9" height="9" fill="currentColor"/>
+          <rect x="13" y="2" width="9" height="9" fill="currentColor" opacity=".6"/>
+          <rect x="2" y="13" width="9" height="9" fill="currentColor" opacity=".4"/>
+          <rect x="13" y="13" width="9" height="9" fill="currentColor" opacity=".8"/>
+        </svg>
+        <span>俄罗斯成语方块儿</span>
+      </a>
+      <a class="brand-version" href="https://github.com/paulfxyz/tetris/releases/tag/v1.5.6" target="_blank" rel="noopener" title="查看上游版本">v1.5.6</a>
+    </div>
+    <nav class="topbar-actions">
+      <button class="iconbtn" id="btn-zoom-out" title="缩小" aria-label="缩小">−</button>
+      <button class="iconbtn" id="btn-zoom-reset" title="适应屏幕" aria-label="适应屏幕">◱</button>
+      <button class="iconbtn" id="btn-zoom-in" title="放大" aria-label="放大">+</button>
+      <span class="sep" aria-hidden="true"></span>
+      <button class="iconbtn" id="btn-mode" title="明暗模式" aria-label="切换明暗模式">☼</button>
+      <button class="iconbtn" id="btn-settings" title="设置" aria-label="设置">⚙</button>
+    </nav>
+  </header>
+
+  <!-- Mobile floating bar (HOLD · stats · NEXT · actions). Hidden on desktop via CSS. -->
+  <div class="mobile-bar" id="mobile-bar" aria-label="游戏状态">
+    <div class="mb-mini">
+      <span class="mb-mini-label">暂存</span>
+      <canvas id="hold-canvas-mobile" width="96" height="96" aria-label="暂存的成语方块"></canvas>
+    </div>
+    <dl class="mb-stats">
+      <dt class="mb-stat-l">分数</dt><dd class="mb-stat-v" id="mb-score">0</dd>
+      <dt class="mb-stat-l">等级</dt><dd class="mb-stat-v" id="mb-level">1</dd>
+      <dt class="mb-stat-l">消除行数</dt><dd class="mb-stat-v" id="mb-lines">0</dd>
+      <dt class="mb-stat-l">时间</dt><dd class="mb-stat-v" id="mb-time">0:00</dd>
+    </dl>
+    <div class="mb-mini">
+      <span class="mb-mini-label">下一个</span>
+      <canvas id="next-canvas-mobile" width="96" height="120" aria-label="即将出场的成语方块"></canvas>
+    </div>
+    <div class="mb-actions">
+      <button class="iconbtn" id="btn-mode-mobile" title="明暗模式" aria-label="切换明暗模式">☼</button>
+      <button class="iconbtn" id="btn-settings-mobile" title="设置" aria-label="设置">⚙</button>
+    </div>
+  </div>
+
+  <!-- Main game stage -->
+  <main class="stage">
+    <div class="game-wrap" id="game-wrap">
+
+      <!-- Left HUD -->
+      <aside class="hud hud-left">
+        <div class="hud-block">
+          <div class="hud-label">暂存</div>
+          <canvas id="hold-canvas" width="96" height="96" aria-label="暂存的成语方块"></canvas>
+          <div class="hud-hint" aria-hidden="true">
+            <span class="hint-desktop"><kbd>C</kbd> 或 <kbd>Shift</kbd></span>
+            <span class="hint-mobile">长按棋盘暂存</span>
+          </div>
+        </div>
+        <div class="hud-block">
+          <div class="hud-label">游戏状态</div>
+          <dl class="stats">
+            <dt>分数</dt><dd id="stat-score">0</dd>
+            <dt>消除行数</dt><dd id="stat-lines">0</dd>
+            <dt>等级</dt><dd id="stat-level">1</dd>
+            <dt>时间</dt><dd id="stat-time">0:00</dd>
+          </dl>
+        </div>
+      </aside>
+
+      <!-- Board -->
+      <section class="board-frame" aria-label="游戏棋盘">
+        <canvas id="game-canvas" width="300" height="600"></canvas>
+
+        <!-- Overlay: title / pause / game over -->
+        <div class="overlay" id="overlay">
+          <div class="overlay-card" id="overlay-card">
+            <!-- Filled by JS -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Right HUD -->
+      <aside class="hud hud-right">
+        <div class="hud-block">
+          <div class="hud-label">下一个</div>
+          <canvas id="next-canvas" width="96" height="240" aria-label="即将出场的成语方块"></canvas>
+        </div>
+        <div class="hud-block hud-keys">
+          <div class="hud-label">操作说明</div>
+          <ul class="keys">
+            <li><kbd>←</kbd><kbd>→</kbd> 移动</li>
+            <li><kbd>↓</kbd> 加速下落</li>
+            <li><kbd>↑</kbd> 顺时针旋转</li>
+            <li><kbd>空格</kbd> 硬降</li>
+            <li><kbd>C</kbd> 暂存</li>
+            <li><kbd>P</kbd> 暂停</li>
+          </ul>
+        </div>
+      </aside>
+    </div>
+
+    <!-- Virtual pad -->
+    <div class="vpad" id="vpad" aria-label="虚拟按键">
+      <button class="vbtn" data-action="left" aria-label="向左移动">◀</button>
+      <button class="vbtn" data-action="rotate" aria-label="顺时针旋转">↻</button>
+      <button class="vbtn" data-action="right" aria-label="向右移动">▶</button>
+      <button class="vbtn" data-action="hold" aria-label="暂存">存</button>
+      <button class="vbtn vbtn-down" data-action="soft" aria-label="加速下落">▼</button>
+      <button class="vbtn vbtn-drop" data-action="drop" aria-label="硬降">⤓</button>
+    </div>
+  </main>
+
+  <!-- 设置 dialog -->
+  <dialog id="settings-dialog" class="dialog">
+    <form method="dialog" class="dialog-form">
+      <h2>设置</h2>
+
+      <fieldset>
+        <legend>主题</legend>
+        <label><input type="radio" name="theme" value="classic" /> <span>经典：黑白方块</span></label>
+        <label><input type="radio" name="theme" value="color" /> <span>彩色：像素方块</span></label>
+        <label><input type="radio" name="theme" value="modern" /> <span>现代：玻璃方块与动画</span></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>明暗模式</legend>
+        <label><input type="radio" name="mode" value="dark" /> <span>深色</span></label>
+        <label><input type="radio" name="mode" value="light" /> <span>浅色</span></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>显示</legend>
+        <label class="row"><span>缩放</span>
+          <input type="range" name="zoom" min="60" max="160" step="5" />
+          <output name="zoom-out">100%</output>
+        </label>
+        <label class="row"><span>适应屏幕</span>
+          <input type="checkbox" name="fit" />
+        </label>
+        <label class="row"><span>显示虚拟按键</span>
+          <select name="vpad-mode">
+            <option value="auto">自动（触摸设备）</option>
+            <option value="always">始终显示</option>
+            <option value="never">始终隐藏</option>
+          </select>
+        </label>
+      </fieldset>
+
+      <fieldset>
+        <legend>声音</legend>
+        <label class="row"><span>音效</span><input type="checkbox" name="sfx" /></label>
+        <label class="row"><span>音乐</span><input type="checkbox" name="music" /></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>可选排行榜</legend>
+        <label class="row"><span>排行榜服务地址</span>
+          <input type="url" name="server" placeholder="留空使用本站可选服务" />
+        </label>
+        <p class="hint">排行榜为可选功能。断网或服务不可用时仍能游戏并保存本地成绩；下载本地成绩无需联网。</p>
+      </fieldset>
+
+      <menu>
+        <button value="cancel">关闭</button>
+        <button value="save" class="primary">保存</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- Game-over dialog -->
+  <dialog id="gameover-dialog" class="dialog">
+    <form method="dialog" class="dialog-form" id="gameover-form">
+      <h2>游戏结束</h2>
+      <p class="final">
+        <span><strong id="go-score">0</strong> 分</span>
+        <span><strong id="go-lines">0</strong> 行</span>
+        <span>等级 <strong id="go-level">1</strong></span>
+        <span><strong id="go-time">0:00</strong></span>
+      </p>
+
+      <label class="row"><span>昵称</span><input name="name" maxlength="32" required placeholder="玩家" autocomplete="off" /></label>
+      <label class="row"><span>留言</span><input name="tagline" maxlength="64" placeholder="我喜欢成语方块" autocomplete="off" /></label>
+      <label class="row"><span>邮箱（可选）</span><input name="email" type="email" maxlength="120" placeholder="邮箱地址" autocomplete="off" /></label>
+
+      <p class="hint" id="go-status"></p>
+
+      <menu>
+        <button value="cancel" formnovalidate>跳过</button>
+        <button value="download" class="ghost">下载本地成绩</button>
+        <button value="submit" class="primary">提交并下载</button>
+      </menu>
+    </form>
+  </dialog>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <span>俄罗斯成语方块儿 · 基于原版 v1.5.6</span>
+    <br />
+    <a href="https://github.com/paulfxyz/tetris" target="_blank" rel="noopener">原版源码</a>
+    <span class="sep">/</span>
+    <a href="/pubkey.asc" target="_blank" rel="noopener">签名公钥</a>
+    <span class="sep">/</span>
+    <a href="https://github.com/paulfxyz/tetris/releases" target="_blank" rel="noopener">版本记录</a>
+    <span class="sep">/</span>
+    <a href="https://github.com/paulfxyz/tetris/blob/main/LICENSE" target="_blank" rel="noopener">开源许可</a>
+    <br />
+    <span>原版作者：<a href="https://github.com/paulfxyz" target="_blank" rel="noopener">@paulfxyz</a> · 里斯本</span>
+  </footer>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>
