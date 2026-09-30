@@ -13,10 +13,10 @@
 | 当前 Hold | 1 槽，保存 Shape + Idiom + Characters |
 | 成语数据 | 本地 20 条，位置 `public/data/idioms.json` |
 | 离线能力 | 完成一次在线加载后可离线刷新；首次无缓存离线访问不保证可用 |
-| Service Worker | `tetris-v1.5.6-zh-offline-4` |
-| 网页试玩版 | 已发布：https://idiom-tetris-demo.victor013.chatgpt.site（公开访问） |
+| Service Worker | `tetris-v1.5.6-zh-offline-5` |
+| 网页试玩版 | GitHub Pages 已发布：https://victor013yl.github.io/idiom-tetris-demo/ |
 
-发布平台已确认成功；本机命令行被 Cloudflare 拦截，浏览器加载验证超时，公开站点端到端试玩仍待用户确认。本地 303 项测试通过。
+GitHub Pages 部署工作流已成功完成，正式地址返回 HTTP 200 和游戏中文首页。原 `chatgpt.site` 地址在部分移动网络被安全服务拦截，不再作为主要分享地址。本地 303 项测试通过。
 
 ## 已完成核心功能
 
@@ -80,6 +80,7 @@
 - 碎石声音强弱属于主观体验，仍需要设备试听确认。
 - 可选远程排行榜没有完成端到端验证；本地回退已可用。
 - 中文字体依赖设备系统字体，跨平台显示可能略有差异。
+- GitHub Pages 手机端真实设备的触控、音频和离线安装体验仍需玩家设备复核。
 
 ## 尚未开发内容
 

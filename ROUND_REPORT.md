@@ -1,43 +1,38 @@
-# 本轮报告：发布网页试玩版
+# 本轮报告：GitHub Pages 网页试玩版
 
 日期：2026-09-30。
 
 ## 目标与结果
 
-将当前版本发布到独立 HTTPS 公开站点，方便转发给他人试玩。
+将完整项目上传到用户仓库，并发布为可转发的 HTTPS 网页试玩版。
 
-正式地址：https://idiom-tetris-demo.victor013.chatgpt.site
+- 仓库：https://github.com/victor013YL/idiom-tetris-demo
+- 正式试玩：https://victor013yl.github.io/idiom-tetris-demo/
+- GitHub Actions 部署：成功（run `36725762836`，attempt 2）。
 
-Sites 平台返回部署状态 succeeded，站点权限已设为 public。
+## 修改文件
 
-## 修改文件与发布内容
+- `public/index.html`：品牌首页链接改为相对路径，兼容 GitHub Pages 项目子路径。
+- `public/sw.js`：缓存版本更新为 `tetris-v1.5.6-zh-offline-5`。
+- `tests/service-worker.test.mjs`：同步缓存版本断言。
+- `.github/workflows/pages.yml`：新增静态站点发布工作流，部署 `public` 目录。
+- `PROJECT_STATUS.md`、`ROUND_REPORT.md`：记录发布状态和正式链接。
 
-- .openai/hosting.json：保存站点项目 ID 和静态目录配置。
-- PROJECT_STATUS.md：记录公开地址及验证限制。
-- ROUND_REPORT.md：本轮发布记录。
-
-游戏产品代码未修改。发布副本使用 dist 目录，与项目 public 内容一致，包含20条成语、本地音乐和所有模块。保留原 MIT LICENSE；原项目仓库和上游远程未修改。
-
-## 发布标识
-
-- 项目：appgprj_6abcfa1c925081919148b08f0563add1。
-- 版本：appgprj_6abcfa1c925081919148b08f0563add1~appgver_a9e3919294dc819182356cd11ec635e0。
-- 部署：appgdep_6abcfb50945c8191a458b2b910a462a5。
-- 发布提交：1bd4e543c4dbcda764f9a2cb867dc5e4a284a350。
-- 复用配置中的项目ID更新后续版本，不重复创建站点。
+项目同时上传了本地音乐 `public/assets/music.mp3` 及当前 CSS，避免线上缺少本地资源。
 
 ## 测试与验证
 
-- 发布前全量自动测试：303 项，Passed 303，Failed 0，跳过/取消0。
-- 新增测试：0。
-- 平台部署：成功，公开访问权限已生效。
-- 命令行访问正式域名：Cloudflare 返回403，未取得游戏HTML或JSON。
-- 浏览器打开正式域名：验证请求超时，未完成在线玩法及离线缓存验收。
-
-不能把平台发布成功视为公开页面端到端验收通过。本地既有中文、离线和玩法验证仍有效，但公开域名的SW缓存与资源加载需要另行确认。
+- 全量自动测试：303 项，Passed 303，Failed 0，跳过/取消 0。
+- GitHub Pages 发布源：GitHub Actions。
+- 工作流：完成，结论 `success`。
+- 正式地址：HTTP 200。
+- 返回页面标题：`俄罗斯成语方块儿`，中文 HTML、样式、manifest 路径正常。
+- 移动端真实设备仍需继续验证触控、音频恢复和离线安装体验。
 
 ## 已知问题与下一步
 
-本机网络/Cloudflare访问限制使公开页面人工验证未完成。请用手机或其他网络打开正式链接确认；若同样无法访问，下一步处理托管可达性或改用用户账号下的其他静态托管平台。本轮不增加Gamepad、Android或其他玩法。
+- 原 `chatgpt.site` 域名在部分手机网络被安全服务拦截；分享时使用 GitHub Pages 地址。
+- GitHub Pages 首次部署后的 CDN 缓存更新可能需要短暂等待。
+- 下一步只做手机端实际试玩反馈修正，不自动扩展 Gamepad、Android APK 或新玩法。
 
-状态：网页试玩版平台发布成功，公开访问与在线试玩待最终确认。
+状态：GitHub Pages 网页试玩版已发布，可分享给其他玩家。
