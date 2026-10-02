@@ -168,8 +168,10 @@
 
       <fieldset>
         <legend>声音</legend>
-        <label class="row"><span>音效</span><input type="checkbox" name="sfx" /></label>
-        <label class="row"><span>音乐</span><input type="checkbox" name="music" /></label>
+        <label class="row"><span>背景音乐音量 <output name="musicVolume-out">40%</output></span><input aria-label="背景音乐音量" type="range" name="musicVolume" min="0" max="100" value="40" /></label>
+        <label class="row"><span>游戏音效音量 <output name="sfxVolume-out">75%</output></span><input aria-label="游戏音效音量" type="range" name="sfxVolume" min="0" max="100" value="75" /></label>
+        <label class="row"><span>游戏音效 开 / 关</span><input type="checkbox" name="sfx" /></label>
+        <label class="row"><span>背景音乐 开 / 关</span><input type="checkbox" name="music" /></label>
       </fieldset>
 
       <fieldset>

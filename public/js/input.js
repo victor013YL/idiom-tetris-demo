@@ -104,6 +104,10 @@ export class Input {
       // keystrokes. Otherwise letters mapped to game actions — 'p' (pause),
       // 'c' (hold), arrow keys, etc. — get swallowed by preventDefault() and
       // never reach the input. Bail out if the focused element is editable.
+      if (e.target?.closest?.('dialog[open]') || document.activeElement?.closest?.('dialog[open]')) {
+        if (KEYMAP[e.code]) this.blockedKeys.add(e.code);
+        return; // Native dialog controls keep arrows, Space and Escape.
+      }
       if (isEditableTarget(e.target) || isEditableTarget(document.activeElement)) return;
 
       const a = KEYMAP[e.code];
@@ -124,8 +128,7 @@ export class Input {
     });
 
     window.addEventListener('keyup', (e) => {
-      // Mirror the keydown guard: don't track keys pressed inside form fields.
-      if (isEditableTarget(e.target) || isEditableTarget(document.activeElement)) return;
+      // Release keys even inside dialogs, so closing cannot leave stale held input.
       this.held.delete(e.code);
       this.blockedKeys.delete(e.code);
       const a = KEYMAP[e.code];

@@ -165,7 +165,7 @@ function availableBoardWidth() {
   if (isMobile) {
     // v1.5.0: board frame is edge-to-edge (no padding/border), so the budget
     // is the FULL viewport width. The canvas is centered inside via flex.
-    return Math.max(BOARD_MIN_H / BOARD_ASPECT, window.innerWidth);
+    return Math.max(BOARD_MIN_H / BOARD_ASPECT, window.innerWidth - framePadX - 16);
   }
   const cs = getComputedStyle(wrap);
   const hudW = parseFloat(cs.getPropertyValue('--hud-w')) || 130;
@@ -360,6 +360,8 @@ function gameOverScreen() {
 
 function startGame() {
   input.cancelPending();
+  input.uiFrozen = false;
+  input.closeUI?.();
   sound.stopClear?.();
   sound.stopRotate?.();
   engine.reset();
@@ -385,6 +387,7 @@ titleScreen();
 // 'rotate' (Up/X/tap) act as "press any key to start". Other actions are
 // ignored. Once a game is running, we route into the engine and play SFX.
 function action(a) {
+  if (input.uiFrozen) return;
   if (!started || engine.gameOver) {
     if (a === 'drop' || a === 'rotate') startGame();
     return;
@@ -419,7 +422,7 @@ const input = new Input({
   boardEl: document.querySelector('.board-frame'),
   vpadEl: $('#vpad'),
   onAction: action,
-  isBlocked: () => engine.paused || renderer.reward.freezing,
+  isBlocked: () => input.uiFrozen || engine.paused || renderer.reward.freezing,
 });
 
 // ---------------------------------------------------------------------------
@@ -444,6 +447,7 @@ document.querySelectorAll('dialog').forEach(d => {
 // Settings dialog — <dialog> element + a normal <form>, no React.
 // ---------------------------------------------------------------------------
 const settingsDialog = $('#settings-dialog');
+input.closeUI = () => { if (settingsDialog.open) settingsDialog.close(); };
 $('#btn-settings').addEventListener('click', () => {
   // Sync form values to current settings (so the dialog reflects the truth).
   const f = settingsDialog.querySelector('form');
@@ -455,7 +459,14 @@ $('#btn-settings').addEventListener('click', () => {
   f.querySelector('select[name=vpad-mode]').value = settings.get('vpadMode');
   f.querySelector('input[name=sfx]').checked = !!settings.get('sfx');
   f.querySelector('input[name=music]').checked = !!settings.get('music');
+  for (const key of ['musicVolume', 'sfxVolume']) {
+    f.querySelector(`input[name=${key}]`).value = Math.round(settings.get(key) * 100);
+    f.querySelector(`output[name=${key}-out]`).value = Math.round(settings.get(key) * 100) + '%';
+  }
   f.querySelector('input[name=server]').value = settings.get('server') || '';
+  settingsDialog.returnValue = '';
+  input.cancelPending();
+  input.uiFrozen = true;
   settingsDialog.showModal();
 });
 // Live-update the zoom output label as the range slider moves.
@@ -468,16 +479,29 @@ settingsDialog.querySelector('input[name=zoom]').addEventListener('input', (e) =
 // start playing here even if the player hasn't yet hit Press Start.
 settingsDialog.querySelector('input[name=music]').addEventListener('change', (e) => {
   sound.ensure();
+  settings.set('music', e.target.checked);
   sound.setMusic(e.target.checked);
 });
 // Same for SFX — toggle live so the player hears the effect on rotate/move.
 settingsDialog.querySelector('input[name=sfx]').addEventListener('change', (e) => {
+  settings.set('sfx', e.target.checked);
   sound.enabled = e.target.checked;
+  if (!sound.enabled) sound.stopRotate?.();
   if (!sound.enabled) sound.stopClear?.();
 });
+for (const key of ['musicVolume', 'sfxVolume']) {
+  settingsDialog.querySelector(`input[name=${key}]`).addEventListener('input', e => {
+    const volume = Number(e.target.value) / 100;
+    settings.set(key, volume);
+    sound.setVolume(key, volume);
+    settingsDialog.querySelector(`output[name=${key}-out]`).value = e.target.value + '%';
+  });
+}
 // On close, if the user clicked "Save", harvest form values and persist.
 // <dialog>'s returnValue is set by the <button value="save"> that closed it.
 settingsDialog.addEventListener('close', () => {
+  input.cancelPending();
+  input.uiFrozen = false;
   if (settingsDialog.returnValue !== 'save') return;
   const f = settingsDialog.querySelector('form');
   const fd = new FormData(f);
@@ -526,6 +550,8 @@ $('#btn-zoom-reset').addEventListener('click', () => {
 // up but only actually starts after the first user gesture ("Press Start"
 // click) because the AudioContext can't be unlocked before that on iOS/Safari.
 sound.enabled = settings.get('sfx');
+sound.setVolume('musicVolume', settings.get('musicVolume'));
+sound.setVolume('sfxVolume', settings.get('sfxVolume'));
 scoreboard.setServer(settings.get('server'));
 
 // ---------------------------------------------------------------------------
@@ -661,7 +687,7 @@ function loop(now) {
   if (started) {
     // Always advance the frame clock above, but never accumulate gameplay
     // time during feedback. Renderer keeps its independent visual clock.
-    if (!renderer.reward.freezing) engine.tick(dt);
+    if (!input.uiFrozen && !renderer.reward.freezing) engine.tick(dt);
     // Game-over detection — fire once when the engine flips the flag.
     if (engine.gameOver && !overlayEl.dataset.over) {
       overlayEl.dataset.over = '1';
@@ -675,7 +701,7 @@ function loop(now) {
     if (engine.lastClear) { sound.clear(engine.lastClear.n); engine.lastClear = null; }
   }
   trackPiece();
-  renderer.draw(engine, dt);
+  renderer.draw(engine, input.uiFrozen ? 0 : dt);
   // HUD updates — cheap to do every frame because innerText only writes when changed.
   const scoreText = engine.score.toLocaleString();
   const timeText = formatTime(engine.elapsedMs());

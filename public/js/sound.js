@@ -35,10 +35,18 @@ export class Sound {
     this.enabled = true;   // SFX on/off
     this.music = false;    // music on/off
     this.audio = null;     // HTMLAudioElement for background music
-    this.musicVolume = 0.35;
+    this.musicVolume = 0.40;
+    this.sfxVolume = 0.75;
     this.rotateVoice = null;
     this.clearVoice = null;
     this.stoneBuffers = new Map();
+  }
+
+  setVolume(channel, value) {
+    if (!['musicVolume', 'sfxVolume'].includes(channel) || !Number.isFinite(value)) return;
+    this[channel] = Math.min(1, Math.max(0, value));
+    if (channel === 'musicVolume' && this.audio) this.audio.volume = this.musicVolume;
+    if (channel === 'sfxVolume') { this.stopRotate(); this.stopClear(); }
   }
 
   // CRITICAL on iOS / Safari: AudioContext is created in 'suspended' state
@@ -58,14 +66,14 @@ export class Sound {
   // One-shot oscillator with exponential gain decay. Combine with setTimeout
   // to chain blips into arpeggios.
   blip(freq = 440, duration = 0.06, type = 'square', gain = 0.06) {
-    if (!this.enabled) return;
+    if (!this.enabled || this.sfxVolume === 0) return;
     this.ensure();
     if (!this.ctx) return;
     const o = this.ctx.createOscillator();
     const g = this.ctx.createGain();
     o.type = type;
     o.frequency.value = freq;
-    g.gain.setValueAtTime(gain, this.ctx.currentTime);
+    g.gain.setValueAtTime(gain * this.sfxVolume, this.ctx.currentTime);
     g.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + duration);
     o.connect(g).connect(this.ctx.destination);
     o.start();
@@ -75,7 +83,7 @@ export class Sound {
   // Per-action SFX. Pitches chosen by ear.
   move()   { this.blip(220, 0.03, 'square', 0.04); }
   rotate() {
-    if (!this.enabled) return;
+    if (!this.enabled || this.sfxVolume === 0) return;
     this.ensure();
     // Never queue delayed sounds while an autoplay restriction is in force.
     if (!this.ctx || this.ctx.state !== 'running') return;
@@ -98,7 +106,7 @@ export class Sound {
     // Reuse the same oscillator/envelope: rapid input cannot stack voices.
     const volume = voice.gain.gain;
     volume.cancelAndHoldAtTime(now);
-    volume.linearRampToValueAtTime(0.025, now + 0.003);
+    volume.linearRampToValueAtTime(0.025 * this.sfxVolume, now + 0.003);
     volume.exponentialRampToValueAtTime(0.0001, now + 0.06);
     voice.oscillator.frequency.cancelScheduledValues(now);
     voice.oscillator.frequency.setValueAtTime(820, now);
@@ -118,7 +126,7 @@ export class Sound {
   lock()   { this.blip(140, 0.07, 'sawtooth', 0.05); }
 
   clear(n = 1) {
-    if (!this.enabled || !Number.isInteger(n) || n < 1 || n > 4) return;
+    if (!this.enabled || this.sfxVolume === 0 || !Number.isInteger(n) || n < 1 || n > 4) return;
     this.ensure();
     if (!this.ctx || this.ctx.state !== 'running') return;
     const spec = STONE_LEVELS[n];
@@ -148,7 +156,7 @@ export class Sound {
     this.stopClear();
     const source = this.ctx.createBufferSource(), gain = this.ctx.createGain();
     source.buffer = this.stoneBuffers.get(n);
-    gain.gain.value = spec.gain;
+    gain.gain.value = spec.gain * this.sfxVolume;
     source.connect(gain).connect(this.ctx.destination);
     const voice = { source, gain, level: n };
     this.clearVoice = voice;

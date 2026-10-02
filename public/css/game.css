@@ -523,7 +523,6 @@ body.vpad-on .vpad { display: grid; }
    * via MutationObserver) catches the settings + game-over dialogs. */
   body:has(.overlay:not([hidden]):not([data-mode="pause"])) .mobile-bar,
   body:has(.overlay:not([hidden]):not([data-mode="pause"])) .vpad,
-  body.dialog-open .mobile-bar,
   body.dialog-open .vpad {
     display: none !important;
   }
@@ -830,4 +829,23 @@ html[data-theme="color"] .footer { font-family: var(--font-game); font-size: 9px
   .overlay-card h1 { font-size: 21px; }
   .overlay-card small { font-size: 12px; }
   .dialog-form { padding: 16px; }
+}
+
+/* Keep the physical playfield border outside the canvas bitmap on phones. */
+@media (max-width: 760px) {
+  .game-wrap > .board-frame {
+    width: calc(var(--board-w) + 4px);
+    height: calc(var(--board-h) + 4px);
+    flex: 0 0 auto;
+    align-self: center;
+    justify-self: center;
+    box-sizing: border-box;
+    border: 2px solid #8b9fbd;
+    border-radius: 4px;
+    padding: 0;
+    overflow: hidden;
+  }
+  #settings-dialog { max-height: 65dvh; }
+  #settings-dialog::backdrop { background: rgba(0,0,0,.22); backdrop-filter: none; -webkit-backdrop-filter: none; }
+  .dialog-form input[type="range"] { min-width: 0; max-width: 45%; }
 }
